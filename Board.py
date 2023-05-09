@@ -48,7 +48,8 @@ class Board:
             else:
                 for i in range(4):
                     possible += self.board[i][3 - i]       
-            return abs(possible) == 4
+            if abs(possible) == 4:
+                return True
         #verfica horizontal
         possible = 0
         for i in range(4):
