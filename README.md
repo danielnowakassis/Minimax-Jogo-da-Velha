@@ -5,7 +5,7 @@ TDE de Intêligência Articial
 
 - [X] 1. Tabuleiro 4x4 (Fácil);
 
-- [] 2. Agente que faz jogadas aleatórias (Fácil);
+- [X] 2. Agente que faz jogadas aleatórias (Fácil);
 
 - [] 3. Agente que faz jogadas com MinMax com avaliação heurística e um mecanismo de parada de busca (limitada por tempo ou
 por profundidade) (Díficil) ;
@@ -18,7 +18,7 @@ mecanismo de parada de busca. (Díficil);
 - [] 6. Após cada jogada, devem ter informações sobre número da jogada, o tempo gasto na jogada (em segundos) e o estado atual
 do tabuleiro (Fácil);
 
-- [] 7. Ao finalizar uma partida, deve ser indicado o estado final e quem venceu a partida (Fácil);
+- [X] 7. Ao finalizar uma partida, deve ser indicado o estado final e quem venceu a partida (Fácil);
 
 
 
