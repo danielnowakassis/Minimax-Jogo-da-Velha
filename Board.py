@@ -28,7 +28,7 @@ class Board:
                 print(f'| {symbol} |', end='')
                 cont += 1
             print('\n' + str_line)
-    
+
     def clean(self):
         """
         Limpa o console
@@ -96,7 +96,7 @@ class Humano(Jogador):
             else:
                 print("Jogada" + str(a) + "não é possível. Tente outra jogada")
         return a
-    
+
 POSSIBLE_TYPES = ["Random", "MiniMax", "MiniMaxAlphaBeta" ]
 class Maquina(Jogador):
     def __init__(self, index, type):
@@ -126,14 +126,40 @@ class Maquina(Jogador):
         return a
 
 if __name__ == "__main__":
+    """
+    #Instanciamento de variáveis
+    """
+    inteligenca_bots = "Random"
     jogo = Board()
-    humano = Humano()
-    maquina = Maquina(-1, "Random")
     n_jogadas = 0
+    maquina = Maquina(-1, inteligenca_bots)
+    modo = ""
+
+    """
+    #Seleção do momdo de jogo
+    """
+    print("Selecione o modo de jogo:")
+    print("-Jogador Versus Máquina (JxM)")
+    print("-Máquina Versus Máquina (MxM)")
+
+    while True:
+        modo = input()
+        if modo in ["JxM", "MxM"]:
+            break
+        print("Selecione um modo válido")
+
+    if modo == "JxM":
+        jogador = Humano()
+    else:
+        jogador = Maquina(1, inteligenca_bots)
+
+    """
+    Início do jogo
+    """
     while True:
         print()
         jogo.render()
-        jogada = humano.make_play(jogo)
+        jogada = jogador.make_play(jogo)
         if jogo.check_win(jogada):
             print("JOGADOR 1 GANHOU")
             break
