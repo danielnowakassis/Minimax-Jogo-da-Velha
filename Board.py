@@ -1,13 +1,27 @@
+import time
+
 import numpy as np
 import platform
+import functools
 from os import system
 from random import Random
 
+
+def timer(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        t1 = time.perf_counter()
+        res = func(self, *args, **kwargs)
+        t2 = round(time.perf_counter() - t1, 6)
+        print("Tempo da jogada: " + str(t2))
+        return res
+    return wrapper
 
 class Board:
     def __init__(self):
         self.board = np.zeros(shape = (4,4))
         self.possible_plays = [a for a in range(16)]
+        self.plays_ocurred = 0
     
     def render(self):
         """
@@ -43,7 +57,7 @@ class Board:
         """
         verifica se algum jogador ganhou a partida, dado sua jogada
         """
-        if (jogada-1) // 4 in [0,3] and (jogada-1) % 4 in [0,3]: #verifica diagonal para os cantos
+        if (jogada-1) // 4 in [0,3] and (jogada-1) % 4 in [0, 3]:  # Verifica diagonal para os cantos
             possible = 0
             if (jogada - 1) % 5 == 0:
                 for i in range(4):
@@ -64,7 +78,10 @@ class Board:
         for i in range(4):
             possible += self.board[i][(jogada-1) % 4]
         return abs(possible) == 4   
-    
+
+    def contar_jogada(self):
+        self.plays_ocurred += 1
+        print(f"Jogada nº {self.plays_ocurred}")
 
 class Jogador:
 
@@ -80,7 +97,8 @@ class Jogador:
 class Humano(Jogador):
     def __init__(self):
         super().__init__(index = 1)
-    
+
+    @timer
     def make_play(self, tabuleiro : Board):
         """
         método para jogador realizar jogada e alterar estado do tabuleiro
@@ -93,6 +111,7 @@ class Humano(Jogador):
                 tabuleiro.board[(a-1) // 4][(a-1) % 4] = self.id
                 tabuleiro.possible_plays.remove(a - 1)
                 play_not_made = False
+                tabuleiro.contar_jogada()
             else:
                 print("Jogada" + str(a) + "não é possível. Tente outra jogada")
         return a
@@ -102,12 +121,13 @@ class Maquina(Jogador):
     def __init__(self, index, type):
         super().__init__(index)
         if type not in POSSIBLE_TYPES:
-            raise Exception("Tipo do agente não reconhecido, escolha entre : " + POSSIBLE_TYPES)
+            print("Tipo do agente não reconhecido, escolha entre : " + POSSIBLE_TYPES)
         self.type = type
 
         if type == "Random":
             self.random = Random()
-    
+
+    @timer
     def make_play(self, board : Board):
         """
         método para maquina realizar jogada e alterar estado do tabuleiro
@@ -117,6 +137,7 @@ class Maquina(Jogador):
             play = board.possible_plays[self.random.randint(0, len(board.possible_plays)-1)]
             board.possible_plays.remove(play)
             board.board[(play) // 4][(play) % 4] = self.id
+            board.contar_jogada()
             
         elif self.type == "MiniMax":
             "TODO"
@@ -146,7 +167,7 @@ if __name__ == "__main__":
         modo = input()
         if modo in ["JxM", "MxM"]:
             break
-        print("Selecione um modo válido")
+        raise Exception("Selecione um modo válido")
 
     if modo == "JxM":
         jogador = Humano()
@@ -159,6 +180,7 @@ if __name__ == "__main__":
     while True:
         print()
         jogo.render()
+        print()
         jogada = jogador.make_play(jogo)
         if jogo.check_win(jogada):
             print("JOGADOR 1 GANHOU")
@@ -166,6 +188,7 @@ if __name__ == "__main__":
         #jogo.clean()
 
         jogo.render()
+        print()
         jogada = maquina.make_play(jogo)
         if jogo.check_win(jogada):
             print("JOGADOR 2 GANHOU")
