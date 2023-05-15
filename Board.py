@@ -146,6 +146,72 @@ class Maquina(Jogador):
 
         return a
 
+    def eval(self, jogo, player):
+        """
+        Heuristica de avaliação.
+        
+        """
+        n = 0
+        for i in range(4):
+            possible = 0
+            for j in range(4):
+                if jogo[i][j] == 0 or jogo[i][j] == player:
+                    possible += 1
+            if possible == 4:
+                n += 1
+        
+        for i in range(4):
+            possible = 0
+            for j in range(4):
+                if jogo[j][i] == 0 or jogo[j][i] == player:
+                    possible += 1
+            if possible == 4:
+                n += 1
+
+        possible = 0
+        for i in range(4):
+            if jogo[i][i] == 0 or jogo[i][i] == player:
+                possible += 1
+        if possible == 4:
+            n += 1
+        possible = 0
+  
+        for i in range(4):
+            if jogo[i][3 - i] == 0 or jogo[i][3 - i] == player:
+                possible += 1
+        if possible == 4:
+            n += 1
+
+        return n
+
+    def minimax(self,state, depth, player):
+        """
+        
+        """
+        if player == 1:
+            best = [-1, -np.infinity]  
+        else:
+            best = [-1,  +np.infinity]
+
+        if depth == 0:
+            score = self.evaluate(state)
+            return [-1, score]
+
+        for cell in state.possible_plays:
+            jogada = cell
+            state[(jogada) // 4][(jogada) % 4] = player
+            score = self.minimax(state, depth - 1, -player)
+            state[(jogada) // 4][(jogada) % 4] = 0
+            score = jogada
+
+            if player == 1:
+                if score > best:
+                    best = score  # max value
+            else:
+                if score < best:
+                    best = score  # min value
+        return best
+    
 if __name__ == "__main__":
     """
     #Instanciamento de variáveis
@@ -181,17 +247,22 @@ if __name__ == "__main__":
         print()
         jogo.render()
         print()
+        #if modo == "MxM":
+        #    time.sleep(1)
         jogada = jogador.make_play(jogo)
         if jogo.check_win(jogada):
             print("JOGADOR 1 GANHOU")
             break
-        #jogo.clean()
+        jogo.clean()
 
         jogo.render()
         print()
         jogada = maquina.make_play(jogo)
         if jogo.check_win(jogada):
             print("JOGADOR 2 GANHOU")
+            break
+        elif jogo.plays_ocurred == 16:
+            print("EMPATE")
             break
         #jogo.clean()
     jogo.render()
