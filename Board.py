@@ -1,5 +1,5 @@
 import time
-
+import copy
 import numpy as np
 import platform
 import functools
@@ -118,7 +118,7 @@ class Humano(Jogador):
 
 POSSIBLE_TYPES = ["Random", "MiniMax", "MiniMaxAlphaBeta" ]
 class Maquina(Jogador):
-    def __init__(self, index, type):
+    def __init__(self, index, type, max_depth):
         super().__init__(index)
         if type not in POSSIBLE_TYPES:
             print("Tipo do agente não reconhecido, escolha entre : " + POSSIBLE_TYPES)
@@ -126,7 +126,8 @@ class Maquina(Jogador):
 
         if type == "Random":
             self.random = Random()
-
+        else:
+          self.max_depth = max_depth
     @timer
     def make_play(self, board : Board):
         """
@@ -138,12 +139,19 @@ class Maquina(Jogador):
             board.possible_plays.remove(play)
             board.board[(play) // 4][(play) % 4] = self.id
             board.contar_jogada()
+            a = play
             
         elif self.type == "MiniMax":
-            "TODO"
+            copia = copy.deepcopy(board)
+            play = self.minimax(copia, 1, -self.id)[0]
+            assert play in range(16)
+            board.possible_plays.remove(play)
+            board.board[(play) // 4][(play) % 4] = self.id
+            board.contar_jogada()
+            a = play
         else:
             "TODO"
-
+        
         return a
 
     def eval(self, jogo, player):
@@ -155,7 +163,7 @@ class Maquina(Jogador):
         for i in range(4):
             possible = 0
             for j in range(4):
-                if jogo[i][j] == 0 or jogo[i][j] == player:
+                if jogo.board[i][j] == 0 or jogo.board[i][j] == player:
                     possible += 1
             if possible == 4:
                 n += 1
@@ -163,67 +171,110 @@ class Maquina(Jogador):
         for i in range(4):
             possible = 0
             for j in range(4):
-                if jogo[j][i] == 0 or jogo[j][i] == player:
+                if jogo.board[j][i] == 0 or jogo.board[j][i] == player:
                     possible += 1
             if possible == 4:
                 n += 1
 
         possible = 0
         for i in range(4):
-            if jogo[i][i] == 0 or jogo[i][i] == player:
+            if jogo.board[i][i] == 0 or jogo.board[i][i] == player:
                 possible += 1
         if possible == 4:
             n += 1
         possible = 0
   
         for i in range(4):
-            if jogo[i][3 - i] == 0 or jogo[i][3 - i] == player:
+            if jogo.board[i][3 - i] == 0 or jogo.board[i][3 - i] == player:
                 possible += 1
         if possible == 4:
             n += 1
 
         return n
 
-    def minimax(self,state, depth, player):
+    def minimax(self,state, depth, player, jogada = (-1, np.inf)):
         """
         
         """
-        if player == 1:
-            best = [-1, -np.infinity]  
+        if depth % 2 == 1: # depth ímpar
+          agent = 'MAX'
         else:
-            best = [-1,  +np.infinity]
+          agent = 'MIN' # depth par
+        if len(state.possible_plays) == 1 or depth == self.max_depth:
+          if agent == 'MAX':
+            max_v = (-1, -np.inf)
+            for cell in state.possible_plays:
+              copia = copy.deepcopy(jogo)
+              copia.board[cell // 4][cell % 4] = player 
+              copia.possible_plays.remove(cell)
+              heuristica = self.eval(copia, player)
+              if max_v[1] < heuristica:
+                max_v = (cell, heuristica)
+              #print(max_v)
+              return max_v
+          else:
+            min_v = (-1, +np.inf)
+            for cell in jogo.possible_plays:
+              copia = copy.deepcopy(jogo)
+              copia.board[(cell) // 4][(cell) % 4] = player 
+              copia.possible_plays.remove(cell)
+              heuristica = self.eval(copia, player)
+              if min_v[1] > heuristica:
+                min_v = (cell, heuristica)
+              #print(min_v)
+              return min_v
+        elif agent == 'MAX':
+          return self.max_value(state, depth,player, jogada)
+        elif agent == 'MIN':
+          return self.min_value(state, depth,-player, jogada)
+      
+    def max_value(self, jogo : Board, depth, player, jogada):
+      max_v = (-1, -np.inf)
+      for cell in jogo.possible_plays:
+        copia = copy.deepcopy(jogo)
+        copia.board[(cell) // 4][(cell) % 4] = player 
+        copia.possible_plays.remove(cell)
+        heuristica = self.eval(copia, player)
+        max_v = self.maximo(max_v, self.minimax(copia, depth + 1, player, jogada))
+      return max_v
+      
+        
+    def min_value(self, jogo : Board, depth, player, jogada):
+      min_v = (-1, +np.inf)
+      for cell in jogo.possible_plays:
+        copia = copy.deepcopy(jogo)
+        copia.board[(cell) // 4][(cell) % 4] = player 
+        copia.possible_plays.remove(cell)
+        heuristica = self.eval(copia, player)
+        min_v = self.minimo((cell, heuristica), self.minimax(copia, depth + 1, player, jogada))
+      return min_v
 
-        if depth == 0:
-            score = self.evaluate(state)
-            return [-1, score]
+    def maximo(self, tuple_v, heuristic):
+      if tuple_v[1] < heuristic[1]:
+        return heuristic
+      else:
+        return tuple_v
 
-        for cell in state.possible_plays:
-            jogada = cell
-            state[(jogada) // 4][(jogada) % 4] = player
-            score = self.minimax(state, depth - 1, -player)
-            state[(jogada) // 4][(jogada) % 4] = 0
-            score = jogada
+    def minimo(self, tuple_v, heuristic):
+      if tuple_v[1] > heuristic[1]:
+        return heuristic
+      else:
+        return tuple_v
 
-            if player == 1:
-                if score > best:
-                    best = score  # max value
-            else:
-                if score < best:
-                    best = score  # min value
-        return best
     
+
 if __name__ == "__main__":
     """
     #Instanciamento de variáveis
     """
-    inteligenca_bots = "Random"
+    inteligenca_bots = "MiniMax"
     jogo = Board()
     n_jogadas = 0
-    maquina = Maquina(-1, inteligenca_bots)
+    maquina = Maquina(-1, inteligenca_bots, 5)
     modo = ""
 
     """
-    #Seleção do momdo de jogo
+    #Seleção do modo de jogo
     """
     print("Selecione o modo de jogo:")
     print("-Jogador Versus Máquina (JxM)")
@@ -238,7 +289,7 @@ if __name__ == "__main__":
     if modo == "JxM":
         jogador = Humano()
     else:
-        jogador = Maquina(1, inteligenca_bots)
+        jogador = Maquina(1, inteligenca_bots, 5)
 
     """
     Início do jogo

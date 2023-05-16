@@ -15,7 +15,7 @@ mecanismo de parada de busca. (Díficil);
 
 - [X] 5. Ao iniciar partida, ter opção Humano x Máquina ou Máquina x Máquina (Fácil);
 
-- [] 6. Após cada jogada, devem ter informações sobre número da jogada, o tempo gasto na jogada (em segundos) e o estado atual
+- [X] 6. Após cada jogada, devem ter informações sobre número da jogada, o tempo gasto na jogada (em segundos) e o estado atual
 do tabuleiro (Fácil);
 
 - [X] 7. Ao finalizar uma partida, deve ser indicado o estado final e quem venceu a partida (Fácil);
