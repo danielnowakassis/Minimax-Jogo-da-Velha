@@ -154,8 +154,8 @@ class Maquina(Jogador):
         elif self.type == "MiniMax":
             copia = copy.deepcopy(board)
             minimax = self.minimax(copia, 1, self.id)
-            print(minimax)
-            print()
+            #print(minimax)
+            #print()
             play = minimax[0]
             a = play
         else:
@@ -236,8 +236,8 @@ class Maquina(Jogador):
         Heuristica de avaliação.
 
         """
-        #return self.possible_wins(jogo, 1) - self.possible_wins(jogo, -1)
-        return self.win_state(jogo, player)
+        return self.possible_wins(jogo, 1) - self.possible_wins(jogo, -1)
+        #return self.win_state(jogo, player)
 
     def minimax(self, state, depth, player, jogada=(-1, np.inf)):
         """
@@ -255,10 +255,10 @@ class Maquina(Jogador):
                     copia.board[cell // 4][cell % 4] = player
                     copia.possible_plays.remove(cell)
                     heuristica = self.eval(copia, player)
-                    if max_v[1] < heuristica:
+                    if heuristica > max_v[1]:
                         max_v = (cell, heuristica, copia)
                     # print(max_v)
-                    return max_v
+                return max_v
             else:
                 min_v = (-1, +np.inf)
                 for cell in jogo.possible_plays:
@@ -266,10 +266,10 @@ class Maquina(Jogador):
                     copia.board[(cell) // 4][(cell) % 4] = player
                     copia.possible_plays.remove(cell)
                     heuristica = self.eval(copia, player)
-                    if min_v[1] > heuristica:
+                    if heuristica < min_v[1]:
                         min_v = (cell, heuristica, copia)
                     # print(min_v)
-                    return min_v
+                return min_v
         elif agent == 'MAX':
             return self.max_value(state, depth, player, jogada)
         elif agent == 'MIN':
@@ -281,8 +281,8 @@ class Maquina(Jogador):
             copia = copy.deepcopy(jogo)
             copia.board[(cell) // 4][(cell) % 4] = player
             copia.possible_plays.remove(cell)
-            heuristica = self.eval(copia, player)
-            max_v = self.maximo((cell, heuristica,copia), self.minimax(copia, depth + 1, player, jogada))
+            #heuristica = self.eval(copia, player)
+            max_v = self.maximo(max_v, self.minimax(copia, depth + 1, player, jogada))
         return max_v
 
     def min_value(self, jogo: Board, depth, player, jogada):
@@ -291,21 +291,21 @@ class Maquina(Jogador):
             copia = copy.deepcopy(jogo)
             copia.board[(cell) // 4][(cell) % 4] = player
             copia.possible_plays.remove(cell)
-            heuristica = self.eval(copia, player)
-            min_v = self.minimo((cell, heuristica, copia), self.minimax(copia, depth + 1, player, jogada))
+            #heuristica = self.eval(copia, player)
+            min_v = self.minimo(min_v, self.minimax(copia, depth + 1, player, jogada))
         return min_v
 
     def maximo(self, tuple_v, heuristic):
-        if tuple_v[1] < heuristic[1]:
-            return heuristic
-        else:
+        if tuple_v[1] > heuristic[1]:
             return tuple_v
+        else:
+            return heuristic
 
     def minimo(self, tuple_v, heuristic):
-        if tuple_v[1] > heuristic[1]:
-            return heuristic
-        else:
+        if tuple_v[1] < heuristic[1]:
             return tuple_v
+        else:
+            return heuristic
 
 
 if __name__ == "__main__":
