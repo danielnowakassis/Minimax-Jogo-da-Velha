@@ -207,53 +207,104 @@ class Maquina(Jogador):
 
     def possible_wins(self, jogo, player):
         n = 0
-        for i in range(4):
-            possible = 0
-            for j in range(4):
-                if jogo.board[i][j] == 0 or jogo.board[i][j] == player:
-                    possible += 1
-            if possible == 4:
+
+        for i in range(0,4):
+            ally = 0
+            enemy = 0
+            empty = 0
+            for j in range(0, 4):
+                if jogo.board[i][j] == player:
+                    ally += 1
+                elif jogo.board[i][j] == 0:
+                    empty += 1
+                else:
+                    enemy += 1
+
+            if ally == 4:
+                return np.inf
+            elif enemy == 4:
+                return -np.inf
+
+            if ally + empty == 4:
                 n += 1
+            elif enemy + empty == 4:
+                n -= 1
 
-        for i in range(4):
-            possible = 0
-            for j in range(4):
-                if jogo.board[j][i] == 0 or jogo.board[j][i] == player:
-                    possible += 1
-            if possible == 4:
-                n += 1
+        for i in range(0, 4):
+            ally = 0
+            enemy = 0
+            empty = 0
+            for j in range(0, 4):
+                if jogo.board[j][i] == player:
+                    ally += 1
+                elif jogo.board[j][i] == 0:
+                    empty += 1
+                else:
+                    enemy += 1
 
-        possible = 0
-        for i in range(4):
-            if jogo.board[i][i] == 0 or jogo.board[i][i] == player:
-                possible += 1
-        if possible == 4:
-            n += 1
-        possible = 0
+            if ally == 4:
+                return np.inf
+            elif enemy == 4:
+                return -np.inf
 
-        for i in range(4):
-            if jogo.board[i][3 - i] == 0 or jogo.board[i][3 - i] == player:
-                possible += 1
-        if possible == 4:
-            n += 1
+            if ally + empty == 4:
+                n += ally
+            elif enemy + empty == 4:
+                n -= enemy
+
+        ally = 0
+        enemy = 0
+        empty = 0
+        for i in range(0, 4):
+            if jogo.board[i][i] == player:
+                ally += 1
+            elif jogo.board[i][i] == 0:
+                empty += 1
+            else:
+                enemy += 1
+
+        if ally == 4:
+            return np.inf
+        elif enemy == 4:
+            return -np.inf
+
+        if ally + empty == 4:
+            n += ally
+        elif enemy + empty == 4:
+            n -= enemy
+
+        ally = 0
+        enemy = 0
+        empty = 0
+        for i in range(0, 4):
+            if jogo.board[i][3 - i] == player:
+                ally += 1
+            elif jogo.board[i][3 - i] == 0:
+                empty += 1
+            else:
+                enemy += 1
+
+        if ally == 4:
+            return np.inf
+        elif enemy == 4:
+            return -np.inf
+
+        if ally + empty == 4:
+            n += ally
+        elif enemy + empty == 4:
+            n -= enemy
 
         return n
 
-    def eval(self, jogo, player, agent_type):
+    def eval(self, jogo, player):
         """
         Heuristica de avaliação.
 
         """
         if player == 1:
-            if agent_type == 'MAX':
-                return self.possible_wins(jogo, 1) - self.possible_wins(jogo, -1)
-            else:
-                return self.possible_wins(jogo, -1) - self.possible_wins(jogo, 1)
+            return self.possible_wins(jogo, 1) - self.possible_wins(jogo, -1)
         else:
-            if agent_type == 'MAX':
-                return self.possible_wins(jogo, -1) - self.possible_wins(jogo, 1)
-            else:
-                return self.possible_wins(jogo, 1) - self.possible_wins(jogo, -1)
+            return self.possible_wins(jogo, -1) - self.possible_wins(jogo, 1)
 
     def minimax(self, state, depth, player):
         self.nos_percorridos += 1
@@ -271,7 +322,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[cell // 4][cell % 4] = player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player, 'MAX')
+                    heuristica = self.eval(copia, player)
                     if heuristica > max_v[1]:
                         max_v = (cell, heuristica, copia)
                     # print(max_v)
@@ -282,7 +333,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[(cell) // 4][(cell) % 4] = player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player,'MIN')
+                    heuristica = self.eval(copia, player)
                     if heuristica < min_v[1]:
                         min_v = (cell, heuristica, copia)
                     # print(min_v)
@@ -329,7 +380,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[cell // 4][cell % 4] = player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player, "MAX")
+                    heuristica = self.eval(copia, player)
                     if heuristica > max_v[1]:
                         max_v = (cell, heuristica, copia)
                     # print(max_v)
@@ -340,7 +391,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[(cell) // 4][(cell) % 4] = player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player, "MAX")
+                    heuristica = self.eval(copia, player)
                     if heuristica < min_v[1]:
                         min_v = (cell, heuristica, copia)
                     # print(min_v)
@@ -356,6 +407,8 @@ class Maquina(Jogador):
             copia = copy.deepcopy(jogo)
             copia.board[(cell) // 4][(cell) % 4] = player
             copia.possible_plays.remove(cell)
+            if self.win_state(copia, player) == 1:
+                return (cell, +np.inf, copia)
             max_v = self.maximo(max_v, self.alfa_beta(copia, depth + 1, player,alpha, beta))
             if max_v[1] >= beta:
                 return max_v
@@ -366,8 +419,10 @@ class Maquina(Jogador):
         min_v = (-1, +np.inf, 0)
         for cell in jogo.possible_plays:
             copia = copy.deepcopy(jogo)
-            copia.board[(cell) // 4][(cell) % 4] = player
+            copia.board[(cell) // 4][(cell) % 4] = -player
             copia.possible_plays.remove(cell)
+            if self.win_state(copia, -player) == -1:
+                return (cell, -np.inf, copia)
             min_v = self.minimo(min_v, self.alfa_beta(copia, depth + 1, player,alpha, beta))
             if min_v[1] <= alpha:
                 return min_v
