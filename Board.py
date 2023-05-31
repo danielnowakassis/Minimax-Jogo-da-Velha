@@ -350,6 +350,8 @@ class Maquina(Jogador):
             copia = copy.deepcopy(jogo)
             copia.board[(cell) // 4][(cell) % 4] = player
             copia.possible_plays.remove(cell)
+            if self.win_state(copia, player) == 1:
+                return (cell, +np.inf, copia)
             #heuristica = self.eval(copia, player)
             max_v = self.maximo(max_v, self.minimax(copia, depth + 1, player))
         return max_v
@@ -360,6 +362,8 @@ class Maquina(Jogador):
             copia = copy.deepcopy(jogo)
             copia.board[(cell) // 4][(cell) % 4] = player
             copia.possible_plays.remove(cell)
+            if self.win_state(copia, player) == -1:
+                return (cell, +np.inf, copia)
             #heuristica = self.eval(copia, player)
             min_v = self.minimo(min_v, self.minimax(copia, depth + 1, player))
         return min_v
@@ -446,10 +450,10 @@ if __name__ == "__main__":
     """
     #Instanciamento de variáveis
     """
-    inteligenca_bots = "MiniMaxAlphaBeta"
+   
     jogo = Board()
     n_jogadas = 0
-    maquina = Maquina(-1, inteligenca_bots, max_depth=5)
+    
     modo = ""
 
     """
@@ -458,18 +462,44 @@ if __name__ == "__main__":
     print("Selecione o modo de jogo:")
     print("-Jogador Versus Máquina (1)")
     print("-Máquina Versus Máquina (2)")
-    print("-Máquina Versus Máquina (3)")
-
     while True:
         modo = input()
         if modo in ["1", "2"]:
             break
         raise Exception("Selecione um modo válido")
-
+    print("Selecione a inteligencia do Bot")
+    print("1 - Random")
+    print("2 - MiniMax")
+    print("3 - MiniMaxAlphaBeta")
+    inteligencia = input()
+    if inteligencia == "1":
+        inteligenca_bots = "Random"
+    elif inteligencia == "2":
+        inteligenca_bots = "MiniMax"
+    elif inteligencia == "3":
+        inteligenca_bots = "MiniMaxAlphaBeta"
+    else:
+        raise Exception("Selecione um modo válido")
+    
     if modo == "1":
         jogador = Humano()
+        maquina = Maquina(-1, inteligenca_bots, max_depth=5)
     else:
         jogador = Maquina(1, inteligenca_bots, max_depth=5)
+        print("Selecione a inteligencia do Bot")
+        print("1 - Random")
+        print("2 - MiniMax")
+        print("3 - MiniMaxAlphaBeta")
+        inteligencia = input()
+        if inteligencia == "1":
+            inteligenca_bots = "Random"
+        elif inteligencia == "2":
+            inteligenca_bots = "MiniMax"
+        elif inteligencia == "3":
+            inteligenca_bots = "MiniMaxAlphaBeta"
+        else:
+            raise Exception("Selecione um modo válido")
+        maquina = Maquina(-1, inteligenca_bots, max_depth=5)
 
     """
     Início do jogo
