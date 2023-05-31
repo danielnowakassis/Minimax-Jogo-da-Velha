@@ -7,10 +7,10 @@ TDE de Intêligência Articial
 
 - [X] 2. Agente que faz jogadas aleatórias (Fácil);
 
-- [] 3. Agente que faz jogadas com MinMax com avaliação heurística e um mecanismo de parada de busca (limitada por tempo ou
+- [X] 3. Agente que faz jogadas com MinMax com avaliação heurística e um mecanismo de parada de busca (limitada por tempo ou
 por profundidade) (Díficil) ;
 
-- [] 4. Agente com busca competitiva com o algoritmo Minimax e poda Alfa-beta, que também leva em consideração uma função de avaliação heurística e um
+- [X] 4. Agente com busca competitiva com o algoritmo Minimax e poda Alfa-beta, que também leva em consideração uma função de avaliação heurística e um
 mecanismo de parada de busca. (Díficil);
 
 - [X] 5. Ao iniciar partida, ter opção Humano x Máquina ou Máquina x Máquina (Fácil);
