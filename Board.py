@@ -281,39 +281,96 @@ class Maquina(Jogador):
         dado um jogador, retorna o número de jogadas possíveis com ganho
         """
         n = 0
-        for i in range(4):
-            possible = 0
-            for j in range(4):
-                if jogo.board[i][j] == 0 or jogo.board[i][j] == player:
-                    possible += 1
-            if possible == 4:
+
+        for i in range(0,4):
+            ally = 0
+            enemy = 0
+            empty = 0
+            for j in range(0, 4):
+                if jogo.board[i][j] == player:
+                    ally += 1
+                elif jogo.board[i][j] == 0:
+                    empty += 1
+                else:
+                    enemy += 1
+
+            if ally == 4:
+                return np.inf
+            elif enemy == 4:
+                return -np.inf
+
+            if ally + empty == 4:
                 n += 1
+            elif enemy + empty == 4:
+                n -= 1
 
-        for i in range(4):
-            possible = 0
-            for j in range(4):
-                if jogo.board[j][i] == 0 or jogo.board[j][i] == player:
-                    possible += 1
-            if possible == 4:
-                n += 1
+        for i in range(0, 4):
+            ally = 0
+            enemy = 0
+            empty = 0
+            for j in range(0, 4):
+                if jogo.board[j][i] == player:
+                    ally += 1
+                elif jogo.board[j][i] == 0:
+                    empty += 1
+                else:
+                    enemy += 1
 
-        possible = 0
-        for i in range(4):
-            if jogo.board[i][i] == 0 or jogo.board[i][i] == player:
-                possible += 1
-        if possible == 4:
-            n += 1
-        possible = 0
+            if ally == 4:
+                return np.inf
+            elif enemy == 4:
+                return -np.inf
 
-        for i in range(4):
-            if jogo.board[i][3 - i] == 0 or jogo.board[i][3 - i] == player:
-                possible += 1
-        if possible == 4:
-            n += 1
+            if ally + empty == 4:
+                n += ally
+            elif enemy + empty == 4:
+                n -= enemy
+
+        ally = 0
+        enemy = 0
+        empty = 0
+        for i in range(0, 4):
+            if jogo.board[i][i] == player:
+                ally += 1
+            elif jogo.board[i][i] == 0:
+                empty += 1
+            else:
+                enemy += 1
+
+        if ally == 4:
+            return np.inf
+        elif enemy == 4:
+            return -np.inf
+
+        if ally + empty == 4:
+            n += ally
+        elif enemy + empty == 4:
+            n -= enemy
+
+        ally = 0
+        enemy = 0
+        empty = 0
+        for i in range(0, 4):
+            if jogo.board[i][3 - i] == player:
+                ally += 1
+            elif jogo.board[i][3 - i] == 0:
+                empty += 1
+            else:
+                enemy += 1
+
+        if ally == 4:
+            return np.inf
+        elif enemy == 4:
+            return -np.inf
+
+        if ally + empty == 4:
+            n += ally
+        elif enemy + empty == 4:
+            n -= enemy
 
         return n
 
-    def eval(self, jogo, player, agent_type):
+    def eval(self, jogo, player):
         """
         Heuristica de avaliação.
 
@@ -346,7 +403,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[cell // 4][cell % 4] = player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player, 'MAX')
+                    heuristica = self.eval(copia, player)
                     if heuristica > max_v[1]:
                         max_v = (cell, heuristica, copia)
                     # print(max_v)
@@ -357,7 +414,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[(cell) // 4][(cell) % 4] = player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player, 'MIN')
+                    heuristica = self.eval(copia, player,'MIN')
                     if heuristica < min_v[1]:
                         min_v = (cell, heuristica, copia)
                     # print(min_v)
@@ -379,6 +436,7 @@ class Maquina(Jogador):
             copia = copy.deepcopy(jogo)
             copia.board[(cell) // 4][(cell) % 4] = player
             copia.possible_plays.remove(cell)
+            #heuristica = self.eval(copia, player)
             max_v = self.maximo(max_v, self.minimax(copia, depth + 1, player))
         return max_v
 
@@ -414,7 +472,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[cell // 4][cell % 4] = player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player, 'MAX')
+                    heuristica = self.eval(copia, player, "MAX")
                     if heuristica > max_v[1]:
                         max_v = (cell, heuristica, copia)
                     # print(max_v)
@@ -425,7 +483,7 @@ class Maquina(Jogador):
                     copia = copy.deepcopy(jogo)
                     copia.board[(cell) // 4][(cell) % 4] = -player
                     copia.possible_plays.remove(cell)
-                    heuristica = self.eval(copia, player, 'MIN')
+                    heuristica = self.eval(copia, player, "MAX")
                     if heuristica < min_v[1]:
                         min_v = (cell, heuristica, copia)
                     # print(min_v)
@@ -508,41 +566,11 @@ if __name__ == "__main__":
         if modo in ["1", "2"]:
             break
         raise Exception("Selecione um modo válido")
-    print('Selecione o número de jogadas a frente que o(s) computador(es) deve(m) computar : ')
-    max_depth = int(input())
-    print("Selecione a inteligencia do Bot")
-    print("1 - Random")
-    print("2 - MiniMax")
-    print("3 - MiniMaxAlphaBeta")
-    inteligencia = input()
-    if inteligencia == "1":
-        inteligenca_bots = "Random"
-    elif inteligencia == "2":
-        inteligenca_bots = "MiniMax"
-    elif inteligencia == "3":
-        inteligenca_bots = "MiniMaxAlphaBeta"
-    else:
-        raise Exception("Selecione um modo válido")
 
     if modo == "1":
         jogador = Humano()
-        maquina = Maquina(-1, inteligenca_bots, max_depth=max_depth)
     else:
-        jogador = Maquina(1, inteligenca_bots, max_depth=max_depth)
-        print("Selecione a inteligencia do Bot")
-        print("1 - Random")
-        print("2 - MiniMax")
-        print("3 - MiniMaxAlphaBeta")
-        inteligencia = input()
-        if inteligencia == "1":
-            inteligenca_bots = "Random"
-        elif inteligencia == "2":
-            inteligenca_bots = "MiniMax"
-        elif inteligencia == "3":
-            inteligenca_bots = "MiniMaxAlphaBeta"
-        else:
-            raise Exception("Selecione um modo válido")
-        maquina = Maquina(-1, inteligenca_bots, max_depth=max_depth)
+        jogador = Maquina(1, inteligenca_bots, max_depth=5)
 
     """
     Início do jogo
